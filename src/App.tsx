@@ -8,10 +8,10 @@ export default function App() {
   const [snakeX, setSnakeX] = useState<number>(10);
   const [snakeY, setSnakeY] = useState<number>(10);
 
-  const [filledSquares, setFilledSquares] = useState<Element[]>([]);
+  const [filledSquares, setFilledSquares] = useState<string[]>([]);
 
   const [snakePosition, setSnakePosition] = useState<string>(
-    `pos${snakeX}-${snakeY}`
+    `pos-${snakeX}-${snakeY}`
   );
 
   const i = 15;
@@ -26,14 +26,7 @@ export default function App() {
     }
 
     // snake position
-    const pos = document.querySelector(`#pos-${snakeY}-${snakeX}`);
-
-    if (!filledSquares.find((element: Element) => element === pos)) {
-      pos && setFilledSquares([...filledSquares, pos]);
-      pos?.classList.add("bg-red-500");
-
-      console.log(filledSquares);
-    }
+    setSnakePosition(`#pos-${snakeY}-${snakeX}`);
 
     // keyboard event
     document.addEventListener("keydown", keyPress);
@@ -43,12 +36,16 @@ export default function App() {
   }, [snakeX, snakeY, rows, columns]);
 
   useEffect(() => {
-    const pos = document.querySelector(`#pos-${snakeY}-${snakeX}`);
+    document.querySelector(snakePosition)?.classList.add("bg-red-500");
 
-    if (filledSquares.find((element: Element) => element !== pos)) {
-      filledSquares.map((square) => square.classList.remove("bg-red-500"));
+    // if filledSquares does not contain snakePosition, setFilledSquares
+
+    setFilledSquares([...filledSquares, snakePosition]);
+
+    if (filledSquares.find((elem) => elem === snakePosition)) {
+      document.querySelector(snakePosition)?.classList.remove("bg-red-500");
     }
-  }, [snakeX, snakeY, rows, columns]);
+  }, [snakePosition]);
 
   const keyPress = (e: KeyboardEvent) => {
     if (snakeX > -1 && snakeY > -1 && snakeX < 15 && snakeY < 15) {
