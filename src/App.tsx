@@ -1,18 +1,24 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
+export interface Direction {
+  up?: boolean;
+  down?: boolean;
+  left?: boolean;
+  right?: boolean;
+}
+
 export default function App() {
+  const [loading, setLoading] = useState<boolean>(true);
   const [rows, setRows] = useState<string[]>([]);
   const [columns, setColumns] = useState<string[]>([]);
-
   const [snakeX, setSnakeX] = useState<number>(10);
   const [snakeY, setSnakeY] = useState<number>(10);
-
-  const [filledSquares, setFilledSquares] = useState<string[]>([]);
-
   const [snakePosition, setSnakePosition] = useState<string>(
-    `pos-${snakeX}-${snakeY}`
+    `#pos-${snakeX}-${snakeY}`
   );
+  const [filledSquares, setFilledSquares] = useState<string[]>([]);
+  const [direction, setDirection] = useState<Direction>();
 
   const i = 15;
 
@@ -25,27 +31,62 @@ export default function App() {
       setColumns(Array.from({ length: i }, () => ""));
     }
 
-    // snake position
-    setSnakePosition(`#pos-${snakeY}-${snakeX}`);
-
-    // keyboard event
     document.addEventListener("keydown", keyPress);
     return () => {
       document.removeEventListener("keydown", keyPress);
     };
-  }, [snakeX, snakeY, rows, columns]);
+  }, [rows, columns]);
+
+  useEffect(() => {
+    setSnakePosition(`#pos-${snakeY}-${snakeX}`);
+  }, [snakeX, snakeY]);
 
   useEffect(() => {
     document.querySelector(snakePosition)?.classList.add("bg-red-500");
 
-    // if filledSquares does not contain snakePosition, setFilledSquares
-
     setFilledSquares([...filledSquares, snakePosition]);
 
-    if (filledSquares.find((elem) => elem === snakePosition)) {
+    if (!loading && filledSquares.find((elem) => elem === snakePosition)) {
       document.querySelector(snakePosition)?.classList.remove("bg-red-500");
     }
+    setLoading(false);
   }, [snakePosition]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (direction?.right && snakeX < 15) {
+        setSnakeX(snakeX + 1);
+        console.log("left");
+      }
+    }, 1000);
+
+    setTimeout(() => {
+      if (direction?.left && snakeX > 0) {
+        setSnakeX(snakeX - 1);
+        console.log("right");
+      }
+    }, 1000);
+  }, [snakeX]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (direction?.down && snakeY < 15) {
+        setSnakeY(snakeY + 1);
+        console.log("down");
+      }
+    }, 1000);
+
+    setTimeout(() => {
+      if (direction?.up && snakeY > 0) {
+        setSnakeY(snakeY - 1);
+        console.log("up");
+      }
+    }, 1000);
+  }, [snakeY]);
+
+  useEffect(() => {
+    console.log(direction);
+  }, [direction]);
 
   const keyPress = (e: KeyboardEvent) => {
     if (snakeX > -1 && snakeY > -1 && snakeX < 15 && snakeY < 15) {
@@ -53,21 +94,26 @@ export default function App() {
         case 37: {
           // left
           setSnakeX((elementPosition) => elementPosition - 1);
+          setDirection({ left: true, down: false, right: false, up: false });
           break;
         }
         case 38: {
           // up
           setSnakeY((elementPosition) => elementPosition - 1);
+          setDirection({ left: false, down: false, right: false, up: true });
+
           break;
         }
         case 39: {
           // right
           setSnakeX((elementPosition) => elementPosition + 1);
+          setDirection({ left: false, down: false, right: true, up: false });
           break;
         }
         case 40: {
           // down
           setSnakeY((elementPosition) => elementPosition + 1);
+          setDirection({ left: false, down: true, right: false, up: false });
           break;
         }
         default:
